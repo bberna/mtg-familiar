@@ -59,6 +59,10 @@ public class TradeFragment extends FamiliarFragment {
 	private static final int HIGH_PRICE = 2;
 	private static final int FOIL_PRICE = 3;
 
+    /*Price engine */
+    private static final int ENGINE_TCGPLAYER = 0;
+    private static final int ENGINE_MKM = 1;
+
 	/* Side Constants */
 	private static final int LEFT = 0;
 	private static final int RIGHT = 1;
@@ -72,6 +76,7 @@ public class TradeFragment extends FamiliarFragment {
 	private static final int DIALOG_DELETE_TRADE = 5;
 	private static final int DIALOG_CONFIRMATION = 6;
 	private static final int DIALOG_CHANGE_SET = 7;
+    private static final int DIALOG_CHANGE_PRICE_ENGINE = 8;
 
 	/* Save file constants */
 	private static final String AUTOSAVE_NAME = "autosave";
@@ -93,6 +98,7 @@ public class TradeFragment extends FamiliarFragment {
 
 	/* Settings */
 	private int mPriceSetting;
+    private int mPriceEngineSetting;
 	private String mCurrentTrade = "";
 
 	/**
@@ -250,6 +256,7 @@ public class TradeFragment extends FamiliarFragment {
 	public void onResume() {
 		super.onResume();
 		mPriceSetting = Integer.parseInt(getFamiliarActivity().mPreferenceAdapter.getTradePrice());
+        mPriceEngineSetting = Integer.parseInt(getFamiliarActivity().mPreferenceAdapter.getPriceEngine());
 		/* Try to load the autosave trade, the function will handle FileNotFoundException */
 		LoadTrade(AUTOSAVE_NAME + TRADE_EXTENSION);
 	}
@@ -574,13 +581,63 @@ public class TradeFragment extends FamiliarFragment {
 							return null;
 						}
 					}
+                    case DIALOG_CHANGE_PRICE_ENGINE: {
+                        return new AlertDialog.Builder(this.getActivity())
+                                .setTitle("Price Engine")
+                                .setSingleChoiceItems(new String[]{"TCGPlayer.com",
+                                                "magiccardmarket.eu"}, mPriceEngineSetting,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                if (mPriceEngineSetting != which) {
+                                                    mPriceEngineSetting = which;
+
+                                                    getFamiliarActivity().mPreferenceAdapter.setPriceEngine(
+                                                            String.valueOf(mPriceEngineSetting));
+
+
+                                                    /* Update Prices */
+                                                    for (MtgCard data : mLeftList) {
+                                                        if (!data.customPrice) {
+                                                            data.message = getString(R.string.wishlist_loading);
+                                                            loadPrice(data, mLeftAdapter);
+                                                        }
+                                                    }
+                                                    mLeftAdapter.notifyDataSetChanged();
+
+                                                    for (MtgCard data : mRightList) {
+                                                        if (!data.customPrice) {
+                                                            data.message = getString(R.string.wishlist_loading);
+                                                            loadPrice(data, mRightAdapter);
+                                                        }
+                                                    }
+                                                    mRightAdapter.notifyDataSetChanged();
+
+
+                                                    UpdateTotalPrices(BOTH);
+                                                }
+                                                dialog.dismiss();
+                                            }
+                                        }
+                                ).create();
+                    }
 					case DIALOG_PRICE_SETTING: {
 						/* Build the dialog with some choices */
+
+                        /*There is no "High price" for MKM*/
+                        String[] choices;
+                        if(mPriceEngineSetting == ENGINE_MKM) {
+                            choices = new String[]{getString(R.string.trader_Low),
+                                    getString(R.string.trader_Average)};
+                        }
+                        else {
+                            choices = new String[]{getString(R.string.trader_Low),
+                                    getString(R.string.trader_Average),
+                                    getString(R.string.trader_High)};
+                        }
+
 						return new AlertDialog.Builder(this.getActivity())
 								.setTitle(R.string.trader_pricing_dialog_title)
-								.setSingleChoiceItems(new String[]{getString(R.string.trader_Low),
-												getString(R.string.trader_Average),
-												getString(R.string.trader_High)}, mPriceSetting,
+								.setSingleChoiceItems(choices, mPriceSetting,
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog, int which) {
 												if (mPriceSetting != which) {
@@ -912,6 +969,9 @@ public class TradeFragment extends FamiliarFragment {
 			case R.id.trader_menu_clear:
 				showDialog(DIALOG_CONFIRMATION, 0, 0);
 				return true;
+            case R.id.trader_menu_price_engine:
+                showDialog(DIALOG_CHANGE_PRICE_ENGINE, 0, 0);
+                return true;
 			case R.id.trader_menu_settings:
 				showDialog(DIALOG_PRICE_SETTING, 0, 0);
 				return true;

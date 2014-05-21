@@ -24,6 +24,11 @@ along with MTG Familiar.  If not, see <http://www.gnu.org/licenses/>.
         android:showAsAction="ifRoom"
         android:title="@string/trader_clear_fields"/>
     <item
+        android:id="@+id/trader_menu_price_engine"
+        android:showAsAction="ifRoom"
+        android:title="@string/trader_set_price_engine"
+        android:icon="?attr/ic_action_import_export"/>
+    <item
         android:id="@+id/trader_menu_settings"
         android:showAsAction="ifRoom"
         android:icon="?attr/ic_action_import_export"

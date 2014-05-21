@@ -339,6 +339,15 @@ public class PreferenceAdapter {
 		this.edit.commit();
 	}
 
+    /* Price engine */
+    public synchronized String getPriceEngine() {
+        return this.prefs.getString(context.getString(R.string.key_priceEngine), "0");
+    }
+
+    public synchronized void setPriceEngine(String priceEngine) {
+        this.edit.putString(context.getString(R.string.key_priceEngine), priceEngine);
+        this.edit.commit();
+    }
 	/* Date */
 	public synchronized String getLegalityDate() {
 		return this.prefs.getString(context.getString(R.string.key_date), null);

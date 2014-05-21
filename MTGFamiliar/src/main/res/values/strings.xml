@@ -257,6 +257,7 @@ Media licenced under the &lt;a href="http://creativecommons.org/licenses/by-sa/3
     <string name="trader_delete">Delete Trade</string>
     <string name="trader_clear_fields">Clear Fields</string>
     <string name="trader_set_pricing">Set Pricing Option</string>
+    <string name="trader_set_price_engine">Set Price Engine</string>
     <string name="trader_edit_dialog_change_set">Change Set</string>
     <string name="trader_edit_dialog_remove">Remove</string>
     <string name="trader_edit_dialog_reset_price">Reset Price</string>
