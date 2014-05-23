@@ -182,7 +182,7 @@ public class MtgCard {
 	}
 
 	public String getPriceString() {
-		return String.format("$%d.%02d", this.price / 100, this.price % 100);
+		return String.format("%d.%02d", this.price / 100, this.price % 100);
 	}
 
 	public boolean hasPrice() {

@@ -348,7 +348,19 @@ public class PreferenceAdapter {
         this.edit.putString(context.getString(R.string.key_priceEngine), priceEngine);
         this.edit.commit();
     }
-	/* Date */
+
+    /* Currency to display */
+    public synchronized int getCurrency() {
+        return this.prefs.getInt(context.getString(R.string.key_currency), 0);
+    }
+
+    public synchronized void setCurrency(int cur) {
+        this.edit.putInt(context.getString(R.string.key_currency), cur);
+        this.edit.commit();
+    }
+
+
+    /* Date */
 	public synchronized String getLegalityDate() {
 		return this.prefs.getString(context.getString(R.string.key_date), null);
 	}

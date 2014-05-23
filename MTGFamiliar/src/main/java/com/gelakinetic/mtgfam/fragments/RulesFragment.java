@@ -102,6 +102,7 @@ public class RulesFragment extends FamiliarFragment {
 			}
 		}
 
+
 		/* Get arguments to display a rules section, or use defaults */
 		Bundle extras = getArguments();
 		int position;

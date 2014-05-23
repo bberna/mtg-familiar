@@ -59,14 +59,20 @@ public class TradeFragment extends FamiliarFragment {
 	private static final int HIGH_PRICE = 2;
 	private static final int FOIL_PRICE = 3;
 
-    /*Price engine */
+    /*Price engine constants */
     private static final int ENGINE_TCGPLAYER = 0;
     private static final int ENGINE_MKM = 1;
 
-	/* Side Constants */
+    /* Currency */
+    private static final int CURRENCY_DOLLARS = 0;
+    private static final int CURRENCY_EUROS = 1;
+
+
+    /* Side Constants */
 	private static final int LEFT = 0;
 	private static final int RIGHT = 1;
 	private static final int BOTH = 2;
+
 
 	/* Dialog Constants */
 	private static final int DIALOG_UPDATE_CARD = 1;
@@ -123,6 +129,9 @@ public class TradeFragment extends FamiliarFragment {
 		mCheckboxFoil = (CheckBox) myFragmentView.findViewById(R.id.trader_foil);
 		mTotalPriceRight = (TextView) myFragmentView.findViewById(R.id.priceTextRight);
 		mTotalPriceLeft = (TextView) myFragmentView.findViewById(R.id.priceTextLeft);
+
+        mTotalPriceLeft.setText(addCurrencySymbol(mTotalPriceLeft.getText().toString()));
+        mTotalPriceRight.setText(addCurrencySymbol(mTotalPriceRight.getText().toString()));
 
 		/* Set the autocomplete adapter, default number */
 		mNameEditText.setAdapter(new AutocompleteCursorAdapter(this, new String[]{CardDbAdapter.KEY_NAME},
@@ -594,6 +603,14 @@ public class TradeFragment extends FamiliarFragment {
                                                     getFamiliarActivity().mPreferenceAdapter.setPriceEngine(
                                                             String.valueOf(mPriceEngineSetting));
 
+                                                    switch(which) {
+                                                        case ENGINE_TCGPLAYER:
+                                                            getFamiliarActivity().mPreferenceAdapter.setCurrency(CURRENCY_DOLLARS);
+                                                            break;
+                                                        case ENGINE_MKM:
+                                                            getFamiliarActivity().mPreferenceAdapter.setCurrency(CURRENCY_EUROS);
+                                                            break;
+                                                    }
 
                                                     /* Update Prices */
                                                     for (MtgCard data : mLeftList) {
@@ -928,7 +945,7 @@ public class TradeFragment extends FamiliarFragment {
 						this.getActivity().getResources().getColor(getResourceIdFromAttr(R.attr.holo_red)) :
 						this.getActivity().getResources().getColor(
 								getResourceIdFromAttr(R.attr.color_text));
-				mTotalPriceLeft.setText(String.format("$%d.%02d", totalPrice / 100, totalPrice % 100));
+				mTotalPriceLeft.setText(addCurrencySymbol(String.format("%d.%02d", totalPrice / 100, totalPrice % 100)));
 				mTotalPriceLeft.setTextColor(color);
 			}
 			if (side == RIGHT || side == BOTH) {
@@ -950,11 +967,29 @@ public class TradeFragment extends FamiliarFragment {
 						this.getActivity().getResources().getColor(
 								getResourceIdFromAttr(R.attr.color_text)
 						);
-				mTotalPriceRight.setText(String.format("$%d.%02d", totalPrice / 100, totalPrice % 100));
+				mTotalPriceRight.setText(addCurrencySymbol(String.format("%d.%02d", totalPrice / 100, totalPrice % 100)));
 				mTotalPriceRight.setTextColor(color);
 			}
 		}
 	}
+
+    /**
+     * Add the correct currency symbol
+     *
+     * @param priceString the priceWithout currency symbol
+     * @return the price with currency symbol
+     */
+
+    private String addCurrencySymbol(String priceString) {
+        if(getFamiliarActivity().mPreferenceAdapter.getCurrency() == CURRENCY_DOLLARS) {
+            priceString = "$" + priceString;
+        }
+        else if (getFamiliarActivity().mPreferenceAdapter.getCurrency() == CURRENCY_EUROS) {
+            priceString += "€";
+        }
+        return priceString;
+    }
+
 
 	/**
 	 * Handle an ActionBar item click
@@ -1162,7 +1197,7 @@ public class TradeFragment extends FamiliarFragment {
 
 				/* Set the price, and the color depending on custom status */
 				TextView priceField = (TextView) convertView.findViewById(R.id.traderRowPrice);
-				priceField.setText(data.hasPrice() ? data.getPriceString() : data.message);
+				priceField.setText(data.hasPrice() ? addCurrencySymbol(data.getPriceString()) : data.message );
 				if (data.hasPrice()) {
 					if (data.customPrice) {
 						priceField.setTextColor(getActivity().getResources().getColor(getResourceIdFromAttr(R.attr.holo_green)));

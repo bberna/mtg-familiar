@@ -46,4 +46,5 @@
     <string name="key_widgetButtons">widgetButtons</string>
     <string name="key_theme">theme</string>
     <string name="key_priceEngine">priceEngine</string>
+    <string name="key_currency">currency</string>
 </resources>
