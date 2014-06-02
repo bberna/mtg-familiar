@@ -612,10 +612,12 @@ public class TradeFragment extends FamiliarFragment {
                                                             break;
                                                     }
 
+
                                                     /* Update Prices */
                                                     for (MtgCard data : mLeftList) {
                                                         if (!data.customPrice) {
                                                             data.message = getString(R.string.wishlist_loading);
+                                                            data.priceInfo = null;
                                                             loadPrice(data, mLeftAdapter);
                                                         }
                                                     }
@@ -624,6 +626,7 @@ public class TradeFragment extends FamiliarFragment {
                                                     for (MtgCard data : mRightList) {
                                                         if (!data.customPrice) {
                                                             data.message = getString(R.string.wishlist_loading);
+                                                            data.priceInfo = null;
                                                             loadPrice(data, mRightAdapter);
                                                         }
                                                     }
