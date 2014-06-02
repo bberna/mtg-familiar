@@ -229,7 +229,7 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
 
 
 				/* Build the URL */
-            URL priceUrl = new URL("http://www.mkmapi.eu/ws/brendel//products/"+tcgCardName.replace(" ","%20")+"/1/1/true");
+            URL priceUrl = new URL("http://www.mkmapi.eu/ws/brendel/<api_key>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true");
             System.out.println(priceUrl);
             int count = 1;
 
@@ -240,7 +240,7 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
             urlConnection.disconnect();
             results.add(result);
             while(urlConnection.getResponseCode() == 206){
-                priceUrl = new URL("http://www.mkmapi.eu/ws/brendel//products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
+                priceUrl = new URL("http://www.mkmapi.eu/ws/brendel/<api_key>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
                 System.out.println(priceUrl);
                 urlConnection = (HttpURLConnection) priceUrl.openConnection();
                 result = IOUtils.toString(urlConnection.getInputStream());

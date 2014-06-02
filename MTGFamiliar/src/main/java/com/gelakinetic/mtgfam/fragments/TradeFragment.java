@@ -618,6 +618,7 @@ public class TradeFragment extends FamiliarFragment {
                                                         if (!data.customPrice) {
                                                             data.message = getString(R.string.wishlist_loading);
                                                             data.priceInfo = null;
+                                                            data.price = 0;
                                                             loadPrice(data, mLeftAdapter);
                                                         }
                                                     }
@@ -627,6 +628,7 @@ public class TradeFragment extends FamiliarFragment {
                                                         if (!data.customPrice) {
                                                             data.message = getString(R.string.wishlist_loading);
                                                             data.priceInfo = null;
+                                                            data.price = 0;
                                                             loadPrice(data, mRightAdapter);
                                                         }
                                                     }
@@ -1076,7 +1078,7 @@ public class TradeFragment extends FamiliarFragment {
 			PriceFetchRequest priceRequest = new PriceFetchRequest(data.name, data.setCode, data.number, -1,mPriceEngineSetting);
 			mPriceFetchRequests++;
 			getFamiliarActivity().setLoading();
-			getFamiliarActivity().mSpiceManager.execute(priceRequest, data.name + "-" + data.setCode,
+			getFamiliarActivity().mSpiceManager.execute(priceRequest, data.name + "-" + data.setCode + "-"+ String.valueOf(mPriceEngineSetting),
 					DurationInMillis.ONE_DAY, new RequestListener<PriceInfo>() {
 						/**
 						 * This is called when the lookup fails. Set the error message and notify the adapter
