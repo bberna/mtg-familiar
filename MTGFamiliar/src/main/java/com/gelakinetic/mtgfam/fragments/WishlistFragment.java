@@ -496,7 +496,7 @@ public class WishlistFragment extends FamiliarFragment {
 	 * @param mCardNumber The collector's number
 	 */
 	void loadPrice(final String mCardName, final String mSetCode, String mCardNumber) {
-		PriceFetchRequest priceRequest = new PriceFetchRequest(mCardName, mSetCode, mCardNumber, -1);
+		PriceFetchRequest priceRequest = new PriceFetchRequest(mCardName, mSetCode, mCardNumber, -1,0);
 		mPriceFetchRequests++;
 		getFamiliarActivity().setLoading();
 		getFamiliarActivity().mSpiceManager.execute(priceRequest, mCardName + "-" +

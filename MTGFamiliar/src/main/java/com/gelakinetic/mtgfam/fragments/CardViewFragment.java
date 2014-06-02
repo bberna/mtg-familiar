@@ -755,7 +755,7 @@ public class CardViewFragment extends FamiliarFragment {
 				mActivity.setLoading();
 
 				PriceFetchRequest priceRequest;
-				priceRequest = new PriceFetchRequest(mCardName, mSetCode, mCardNumber, mMultiverseId);
+				priceRequest = new PriceFetchRequest(mCardName, mSetCode, mCardNumber, mMultiverseId,0);
 				mActivity.mSpiceManager.execute(priceRequest,
 						mCardName + "-" + mSetCode, DurationInMillis.ONE_DAY, new RequestListener<PriceInfo>() {
 

@@ -1315,6 +1315,30 @@ public class CardDbAdapter {
 		}
 	}
 
+
+    /**
+     * @param setCode
+     * @param mDb
+     * @return
+     * @throws FamiliarDbException
+     */
+    public static String getFullSetName(String setCode, SQLiteDatabase mDb) throws FamiliarDbException {
+        try {
+            String sql = "SELECT " + KEY_NAME + " FROM " + DATABASE_TABLE_SETS + " WHERE " + KEY_CODE + " = '" + setCode.replace("'", "''") + "';";
+            Cursor c = mDb.rawQuery(sql, null);
+            c.moveToFirst();
+
+            String tcgName = c.getString(c.getColumnIndex(KEY_NAME));
+            c.close();
+            return tcgName;
+
+        } catch (SQLiteException e) {
+            throw new FamiliarDbException(e);
+        } catch (IllegalStateException e) {
+            throw new FamiliarDbException(e);
+        }
+    }
+
 	/**
 	 * @param setName
 	 * @param mDb
