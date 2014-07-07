@@ -10,6 +10,10 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.SpiceRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -229,26 +233,27 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
 
 
 				/* Build the URL */
-            URL priceUrl = new URL("http://www.mkmapi.eu/ws/brendel/<api_key>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true");
-            System.out.println(priceUrl);
+            HttpGet requestPrice = new HttpGet("http://www.mkmapi.eu/ws/brendel/<apikey>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true");
+            System.out.println(requestPrice);
             int count = 1;
 
 				/* Fetch the information from the web */
             ArrayList<String> results = new ArrayList<String>();
-            HttpURLConnection urlConnection = (HttpURLConnection) priceUrl.openConnection();
-            String result = IOUtils.toString(urlConnection.getInputStream());
-            urlConnection.disconnect();
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpResponse responsePrice = httpClient.execute(requestPrice);
+            String result = IOUtils.toString(responsePrice.getEntity().getContent());
             results.add(result);
-            while(urlConnection.getResponseCode() == 206){
-                priceUrl = new URL("http://www.mkmapi.eu/ws/brendel/<api_key>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
-                System.out.println(priceUrl);
-                urlConnection = (HttpURLConnection) priceUrl.openConnection();
-                result = IOUtils.toString(urlConnection.getInputStream());
-                urlConnection.disconnect();
-                if(urlConnection.getResponseCode() == 204){
+            while(responsePrice.getStatusLine().getStatusCode() == 206){
+                requestPrice = new HttpGet("http://www.mkmapi.eu/ws/brendel/<apikey>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
+                System.out.println(requestPrice);
+                responsePrice = httpClient.execute(requestPrice);
+
+
+                if(responsePrice.getStatusLine().getStatusCode() == 204){
                     break;
                 }
                 else {
+                    result = IOUtils.toString(responsePrice.getEntity().getContent());
                     results.add(result);
                 }
                 count++;
