@@ -10,6 +10,7 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.SpiceRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -29,10 +30,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import oauth.signpost.basic.UrlStringRequestAdapter;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.http.HttpParameters;
+import oauth.signpost.http.HttpRequest;
+import oauth.signpost.signature.HmacSha1MessageSigner;
+import oauth.signpost.signature.SignatureBaseString;
 
 /**
  * This class extends SpiceRequest for the type PriceInfo, and is used to fetch and cache price info asynchronously
@@ -231,20 +243,60 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
 
             tcgCardName = CardDbAdapter.removeAccentMarks(tcgCardName);
 
+            /* Oauth debug
+            Properties ppp =
+                    new Properties(System.getProperties());
+
+            ppp.setProperty("debug","true");
+            System.setProperties(ppp);
+            */
 
 				/* Build the URL */
-            HttpGet requestPrice = new HttpGet("http://www.mkmapi.eu/ws/brendel/<apikey>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true");
-            System.out.println(requestPrice);
+            String url = "https://sandbox.mkmapi.eu/ws/v1.1/products/"+tcgCardName.replace(" ","%20")+"/1/1/true";
+            HttpGet requestPrice = new HttpGet(url);
+
+            /*Oauth stuff*/
+            CommonsHttpOAuthConsumer oauth_consumer = new CommonsHttpOAuthConsumer("pghpe9LK1pjWqN0H","RYNPx8Ielv1mzJH5JMMUaDg32KNVqFZ9");
+            oauth_consumer.setSigningStrategy(new MKMAuthorizationHeaderSigningStrategy());
+            oauth_consumer.setMessageSigner(new HmacSha1MessageSigner());
+            oauth_consumer.setSendEmptyTokens(true);
+            oauth_consumer.setTokenWithSecret("",""); //as we request only public information we usr empty token and secret token
+            HttpParameters p = new HttpParameters();
+            p.put("realm",url);
+            oauth_consumer.setAdditionalParameters(p);
+
+            oauth_consumer.sign(requestPrice);
+
+
+/*          OAuth debug
+            HttpParameters pt = oauth_consumer.getRequestParameters();
+            HttpRequest request = new UrlStringRequestAdapter(url);
+            SignatureBaseString s = new SignatureBaseString(request,pt);
+
+            System.out.println("basestring="+s.generate());
+
+            System.out.println(requestPrice.getURI());
+            System.out.println("*** Request headers ***");
+            Header[] requestHeaders = requestPrice.getAllHeaders();
+            for(Header header : requestHeaders) {
+                System.out.println(header.toString());
+            }
+*/
+
+
+
             int count = 1;
 
 				/* Fetch the information from the web */
             ArrayList<String> results = new ArrayList<String>();
             HttpClient httpClient = new DefaultHttpClient();
             HttpResponse responsePrice = httpClient.execute(requestPrice);
+            System.out.println("STATUS CODE"+responsePrice.getStatusLine().getStatusCode());
             String result = IOUtils.toString(responsePrice.getEntity().getContent());
+            System.out.println(result);
             results.add(result);
             while(responsePrice.getStatusLine().getStatusCode() == 206){
-                requestPrice = new HttpGet("http://www.mkmapi.eu/ws/brendel/<apikey>/products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
+                requestPrice = new HttpGet("https://sandbox.mkmapi.eu/ws/v1.1/products/"+tcgCardName.replace(" ","%20")+"/1/1/true/" + String.valueOf(count*100+1));
                 System.out.println(requestPrice);
                 responsePrice = httpClient.execute(requestPrice);
 
@@ -265,20 +317,20 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
                 Document document = loadXMLFromString(resp);
                 NodeList expList = document.getElementsByTagName("expansion");
                 for(int i=0; i<expList.getLength();i++) {
-                    System.out.println("explist:"+ expList.toString());
+                    //System.out.println("explist:"+ expList.toString());
                     Node exp = expList.item(i);
-                    System.out.println("set:"+exp.getTextContent()+" tag:"+exp.getNodeName());
-                    System.out.println("nameset:"+setFullName);
+                    //System.out.println("set:"+exp.getTextContent()+" tag:"+exp.getNodeName());
+                    //System.out.println("nameset:"+setFullName);
                     if(exp.getTextContent().equals(setFullName)) {
-                        System.out.println("productList");
+                        //System.out.println("productList");
                         //we found the good product node
                         Node product = exp.getParentNode();
                         NodeList productChildren = product.getChildNodes();
                         for(int j=0; j<productChildren.getLength();j++) {
                             Node n = productChildren.item(j);
-                            System.out.println("product child : "+ n.getNodeName());
+                            //System.out.println("product child : "+ n.getNodeName());
                             if(n.getNodeName().equals("priceGuide")) {
-                                System.out.println("priceList");
+                                //System.out.println("priceList");
                                 //finally, our price node
                                 pi = new PriceInfo();
                                 NodeList priceNodes = n.getChildNodes();
@@ -287,7 +339,7 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
 
                                     try {
                                         if(price.getNodeName().equals("LOW")) {
-                                            System.out.println("low:"+price.getTextContent());
+                                            //System.out.println("low:"+price.getTextContent());
                                             pi.mLow = Double.parseDouble(price.getTextContent());
                                         }
                                         else if(price.getNodeName().equals("AVG")) {
@@ -315,6 +367,12 @@ public class PriceFetchRequest extends SpiceRequest<PriceInfo> {
                     }
                 }
             }
+        } catch (OAuthExpectationFailedException e) {
+            exception = new SpiceException(e.getLocalizedMessage());
+        } catch (OAuthCommunicationException e) {
+            exception = new SpiceException(e.getLocalizedMessage());
+        } catch (OAuthMessageSignerException e) {
+            exception = new SpiceException(e.getLocalizedMessage());
         } catch (FamiliarDbException e) {
             exception = new SpiceException(e.getLocalizedMessage());
         } catch (MalformedURLException e) {

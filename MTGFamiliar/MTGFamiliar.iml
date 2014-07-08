@@ -61,7 +61,9 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="signpost-commonshttp4-1.2.1.2" level="project" />
     <orderEntry type="library" exported="" name="robospice-cache-1.4.12" level="project" />
+    <orderEntry type="library" exported="" name="signpost-core-1.2.1.2" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
     <orderEntry type="library" exported="" name="commons-lang3-3.2.2" level="project" />
     <orderEntry type="library" exported="" name="annotations" level="project" />
